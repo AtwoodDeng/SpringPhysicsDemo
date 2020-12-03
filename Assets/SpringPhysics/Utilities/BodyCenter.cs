@@ -1,18 +1,31 @@
-﻿using System.Collections;
+﻿using Sirenix.OdinInspector;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BodyCenter : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public List<BodyCenter> neighbours = new List<BodyCenter>();
+
+    public float mass = 1.0f;
+    [ReadOnly]
+    public float invMass = 1.0f;
+    public int Index;
+    public Vector3 velocity;
+
     void Start()
     {
-        
+        invMass = mass / 1.0f;
+        PhysicsManager.Instance.Register(this);
+
+    }
+    private void OnEnable()
+    {
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        
+        if ( PhysicsManager.Instance)
+            PhysicsManager.Instance.Unregister(this);
     }
 }
