@@ -9,11 +9,12 @@ public class ConnectionVisialization : MonoBehaviour
 
     public List<GameObject> bars = new List<GameObject>();
 
+    public int MaxVisualNum = 1000;
     private void Awake()
     {
         bars = new List<GameObject>();
 
-        for( int i = 0;  i  < 100; ++ i )
+        for( int i = 0;  i  < MaxVisualNum; ++ i )
         {
             var bar = Instantiate(barPrefab) as GameObject;
             bar.transform.parent = root;
@@ -27,7 +28,7 @@ public class ConnectionVisialization : MonoBehaviour
     public void Update()
     {
         int i;
-        for( i = 0; i < PhysicsManager.Instance.connectionList.Count; ++ i )
+        for( i = 0; i < PhysicsManager.Instance.connectionList.Count && i < MaxVisualNum; ++ i )
         {
             var con = PhysicsManager.Instance.connectionList[i];
             var from = con.body0.transform.position;

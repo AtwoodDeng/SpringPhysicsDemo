@@ -26,11 +26,11 @@ public class V3Buffer
 {
 
     public float[] data;
-    public float x { get { return data[0];  } }
-    public float y { get { return data[1]; } }
-    public float z { get { return data[2]; } }
+    public float x { get { return data[0];  } set { data[0] = value; } }
+    public float y { get { return data[1]; } set { data[1] = value; } }
+    public float z { get { return data[2]; } set { data[2] = value; } }
 
-    public void Rest()
+    public void Reset()
     {
         data[0] = 0;
         data[1] = 0;
@@ -39,15 +39,15 @@ public class V3Buffer
 
     public void Copy( V3Buffer other )
     {
-        for (int i = 0; i < 3; ++i)
-            data[i] = other.data[i];
-
+        data[0] = other.data[0];
+        data[1] = other.data[1];
+        data[2] = other.data[2];
     }
 
     public V3Buffer()
     {
         data = new float[3];
-        Rest();
+        Reset();
     }
     public V3Buffer(V3Buffer other )
     {
@@ -76,42 +76,45 @@ public class V3Buffer
 
     public void Add( V3Buffer other )
     {
-        for (int i = 0; i < 3; ++i)
-            data[i] += other.data[i];
+        data[0] += other.data[0];
+        data[1] += other.data[1];
+        data[2] += other.data[2];
     }
 
 
     public void Reduce(V3Buffer other)
     {
-        for (int i = 0; i < 3; ++i)
-            data[i] -= other.data[i];
+        data[0] -= other.data[0];
+        data[1] -= other.data[1];
+        data[2] -= other.data[2];
     }
     public float GetLength()
     {
-        return Mathf.Sqrt(data[0] * data[0] + data[1] * data[1] + data[2] * data[2]);
+        return Mathf.Sqrt(x * x + y * y + z * z);
     }
 
     public V3Buffer GetNormalize()
     {
         float length = GetLength();
-        return new V3Buffer(data[0] / length, data[1] / length, data[2] / length);
+        return new V3Buffer(x / length, y / length, z / length);
     }
 
     public UnityEngine.Vector3 ToV3( )
     {
-        return new UnityEngine.Vector3(data[0], data[1], data[2]);
+        return new UnityEngine.Vector3(x, y, z);
     }
 
     public UnityEngine.Vector3 ToV2()
     {
-        return new UnityEngine.Vector3(data[0], data[1], 0);
+        return new UnityEngine.Vector3(x, y, 0);
     }
 
     public static V3Buffer operator +(V3Buffer a, V3Buffer b)
     {
         V3Buffer result = new V3Buffer();
-        for (int i = 0; i < 3; ++i)
-            result.data[i] = a.data[i] + b.data[i];
+        result.data[0] = a.data[0] + b.data[0];
+        result.data[1] = a.data[1] + b.data[1];
+        result.data[2] = a.data[2] + b.data[2];
 
         return result;
     }
@@ -119,24 +122,27 @@ public class V3Buffer
     public static V3Buffer operator -(V3Buffer a, V3Buffer b)
     {
         V3Buffer result = new V3Buffer();
-        for (int i = 0; i < 3; ++i)
-            result.data[i] = a.data[i] - b.data[i];
+        result.data[0] = a.data[0] - b.data[0];
+        result.data[1] = a.data[1] - b.data[1];
+        result.data[2] = a.data[2] - b.data[2];
 
         return result;
     }
     public static V3Buffer operator *(V3Buffer a, float k)
     {
         V3Buffer result = new V3Buffer();
-        for (int i = 0; i < 3; ++i)
-            result.data[i] = a.data[i] * k ;
+        result.data[0] = a.data[0] * k;
+        result.data[1] = a.data[1] * k;
+        result.data[2] = a.data[2] * k;
 
         return result;
     }
     public static V3Buffer operator *(float k , V3Buffer a)
     {
         V3Buffer result = new V3Buffer();
-        for (int i = 0; i < 3; ++i)
-            result.data[i] = a.data[i] * k;
+        result.data[0] = a.data[0] * k;
+        result.data[1] = a.data[1] * k;
+        result.data[2] = a.data[2] * k;
 
         return result;
     }
@@ -149,12 +155,14 @@ public class V3Buffer
         data[2] *= k;
     }
 
-    public static V3Buffer Lerp( V3Buffer x , V3Buffer y , float lerp )
+    public override string ToString()
     {
-        V3Buffer result = new V3Buffer();
+        return string.Format("({0:0.00},{1:0.00},{2:0.00})", x, y, z);
+    }
 
-
-        return result;
+    public bool IsNAN()
+    {
+        return float.IsNaN(x) || float.IsNaN(y) || float.IsNaN(z);
     }
 }
 
@@ -193,6 +201,19 @@ public class Matrix3x3Buffer
         for (int i = 0; i < 9; ++i)
             data[i] -= other.data[i];
     }
+
+    public void Copy( Matrix3x3Buffer other )
+    {
+        data[0] = other.data[0];
+        data[1] = other.data[1];
+        data[2] = other.data[2];
+        data[3] = other.data[3];
+        data[4] = other.data[4];
+        data[5] = other.data[5];
+        data[6] = other.data[6];
+        data[7] = other.data[7];
+        data[8] = other.data[8];
+    }
     public void AddI( )
     {
         data[0] += 1;
@@ -217,7 +238,14 @@ public class Matrix3x3Buffer
         return result;
     }
 
-
+    public void InitFromOuterProductOfV3(V3Buffer x)
+    {
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+            {
+                data[i * 3 + j] = x.data[i] * x.data[j];
+            }
+    }
     static public Matrix3x3Buffer CreateFromOuterProductOfV3(V3Buffer x)
     {
         var result = new Matrix3x3Buffer();
@@ -250,7 +278,6 @@ public class Matrix3x3Buffer
 
     public V3Buffer Multiply(V3Buffer input)
     {
-
         V3Buffer result = new V3Buffer();
 
         for (int i = 0; i < 3; ++i)
@@ -269,6 +296,18 @@ public class Matrix3x3Buffer
             data[i] *= value;
     }
 
+    public void InitI()
+    {
+        data[0] = 1;
+        data[1] = 0;
+        data[2] = 0;
+        data[3] = 0;
+        data[4] = 1;
+        data[5] = 0;
+        data[6] = 0;
+        data[7] = 0;
+        data[8] = 1;
+    }
 
     static public Matrix3x3Buffer CreateI()
     {
@@ -328,7 +367,35 @@ public class Matrix3x3Buffer
         return result;
     }
 
+    public void GetInverse( Matrix3x3Buffer other )
+    {
+        var m = new UnityEngine.Matrix4x4();
+        m.m00 = other.data[0];
+        m.m01 = other.data[1];
+        m.m02 = other.data[2];
+        m.m10 = other.data[3];
+        m.m11 = other.data[4];
+        m.m12 = other.data[5];
+        m.m20 = other.data[6];
+        m.m21 = other.data[7];
+        m.m22 = other.data[8];
+        m.m33 = 1f;
+
+        m = m.inverse;
+
+        data[0] = m.m00;
+        data[1] = m.m01;
+        data[2] = m.m02;
+        data[3] = m.m10;
+        data[4] = m.m11;
+        data[5] = m.m12;
+        data[6] = m.m20;
+        data[7] = m.m21;
+        data[8] = m.m22;
+    }
+
     public float Get(int i, int j) { return data[i * 3 + j]; }
+
 }
 
 
@@ -350,7 +417,10 @@ public class PhysicsManager : MonoBehaviour
     public List<BodyCenter> bodyList = new List<BodyCenter>();
     public List<ConnectionBarRT> connectionList = new List<ConnectionBarRT>();
 
-    public int BodyCount {  get { return bodyList.Count;  } }
+    /// <summary>
+    /// Number of the body in the system
+    /// </summary>
+    public int N {  get { return bodyList.Count;  } }
 
 
     virtual public void Register(BodyCenter body)
